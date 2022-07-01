@@ -7,6 +7,8 @@ from mariobeep import mariobeep
 
 readout_rate = 1.0  # frequency in hz
 
+
+
 import pyvisa
 rm = pyvisa.ResourceManager()  # should use Keysight by default
 print(rm.list_resources())
