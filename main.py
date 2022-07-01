@@ -1,13 +1,10 @@
-import pymeasure  # need to import whole library, otherwise pyinstaller fails
-# from pymeasure.instruments.keithley import Keithley2450
+# import pymeasure  # need to import whole library, otherwise pyinstaller fails
+from pymeasure.instruments.keithley import Keithley2450
 from datetime import datetime
 import time
 from mariobeep import mariobeep
 
-
 readout_rate = 1.0  # frequency in hz
-
-
 
 import pyvisa
 rm = pyvisa.ResourceManager()  # should use Keysight by default
@@ -16,7 +13,8 @@ print(rm.list_resources())
 
 try:
     # keithley = Keithley2450('ASRL3::INSTR')
-    keithley = pymeasure.instruments.keithley.Keithley2450('USB0::0x05E6::0x2450::04456958::INSTR')
+    # keithley = pymeasure.instruments.keithley.Keithley2450('USB0::0x05E6::0x2450::04456958::INSTR')
+    keithley = Keithley2450('USB0::0x05E6::0x2450::04456958::INSTR')
     keithley.measure_current()
     keithley.measure_voltage()
     mariobeep(keithley)
