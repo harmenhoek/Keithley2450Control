@@ -12,6 +12,8 @@ target_voltage = 3  # in Volts
 steps = 10  # int number of steps
 pause = 3  # pause in seconds
 
+RampBack = True
+
 import pyvisa
 
 rm = pyvisa.ResourceManager()  # should use Keysight by default
@@ -45,6 +47,9 @@ def ReadOutToLogFile(f, setvoltage):
 # voltages = iter(np.linspace(0, target_voltage, steps))
 setvoltage = None
 voltages = np.linspace(0, target_voltage, steps)
+if RampBack:
+    voltages = np.append(voltages, voltages[::-1])
+
 
 datetimestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 filename = f"Keithley_Logfile_{datetimestamp}.csv"
