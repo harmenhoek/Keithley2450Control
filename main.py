@@ -48,7 +48,7 @@ def ReadOutToLogFile(f, setvoltage):
 setvoltage = None
 voltages = np.linspace(0, target_voltage, steps)
 if RampBack:
-    voltages = np.append(voltages, voltages[::-1])
+    voltages = np.append(voltages, voltages[-2::-1])
 
 
 datetimestamp = datetime.now().strftime('%Y%m%d_%H%M%S')

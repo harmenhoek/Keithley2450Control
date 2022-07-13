@@ -9,6 +9,6 @@ RampBack = True
 
 voltages = np.linspace(0, target_voltage, steps)
 if RampBack:
-    voltages = np.append(voltages, voltages[::-1])
+    voltages = np.append(voltages, voltages[-2::-1])
 
 print(voltages)
