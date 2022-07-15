@@ -1,26 +1,25 @@
 {
-  "readout_rate": 1.0,
-  "mario": false,
+  "readout_rate": 1.0,  // maximum logging rate in Hz. Note: readout from instrument limited.
+  "mario": false,  // play mario tune when starting experiment
 
-  "_mode-comment": "Allowed modes: 'ramping' or 'custom'.",
-  "mode": "ramping",
+  "mode": "ramping", // allowed modes: "ramping" or "custom"
 
-  "ramping_settings": {
-    "target_voltage": 3.0,
-    "steps": 10,
-    "dwell_time": 3,
-    "rampback": false
+  "ramping_settings": {  // if mode: "ramping"
+    "start_voltage": 0.0,  // start voltage of the ramp
+    "target_voltage": 3.0,  // maximum voltage of the ramp
+    "steps": 10,  // ramp till target_voltage in steps steps
+    "dwell_time": 3,  // dwell time at each step in seconds
+    "rampback": false  // once target voltage is reached, ramp back to start_voltage
   },
 
-  "custom_settings": {
-    "voltage_range": [0, 3, 0],
-    "dwell_time": [10, 60, 10]
+  "custom_settings": {  // if mode: "custom"
+    "voltage_range": [0, 3, 0],  // voltages in list
+    "dwell_time": [10, 60, 10]  // dwell_time in seconds of each voltage in list (same length as voltage_range)
   },
-
 
   "advanced_settings": {
-    "device_id": "USB0::0x05E6::0x2450::04456958::INSTR",
-    "front_terminals": true,
-    "datetime_format": "%Y-%m-%d %H:%M:%S.%f"
+    "device_id": "USB0::0x05E6::0x2450::04456958::INSTR",  // visa address of device (includes serial number), see official documentation
+    "front_terminals": true,  // if true, front terminals are used, otherwise back terminals
+    "datetime_format": "%Y-%m-%d %H:%M:%S.%f"  // logging datetime format
   }
 }

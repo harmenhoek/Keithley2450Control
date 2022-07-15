@@ -8,14 +8,17 @@ import numpy as np
 import pyvisa
 import os
 import json
+from json_minify import json_minify  # allows for comments in json
 
 config_path = 'config.json'
 
 if not os.path.isfile(config_path):
     raise FileNotFoundError("config.json is not found.")
 
-with open(config_path) as f:
-    config = json.load(f)
+with open(config_path, 'r') as f:
+    config_raw = f.read()
+
+config = json.loads(json_minify(config_raw))
 
 readout_rate = config['readout_rate']  # read out frequency in hz
 
@@ -23,6 +26,7 @@ if config['mode'] == 'ramping':
     Ramping = True
     CustomRange = False
     target_voltage = config['ramping_settings']['target_voltage']  # in volts
+    start_voltage = config['ramping_settings']['start_voltage']  # in volts
     steps = config['ramping_settings']['steps']  # int number of steps
     dwell_time = config['ramping_settings']['dwell_time']  # pause in seconds
     RampBack = config['ramping_settings']['rampback']  # ramps back to 0 with same steps and dwell_time at the end
@@ -73,7 +77,7 @@ def ReadOutToLogFile(f, setvoltage):
 setvoltage = None
 
 if Ramping:
-    voltages = np.linspace(0, target_voltage, steps)
+    voltages = np.linspace(start_voltage, target_voltage, steps)
     dwell_time = np.ones_like(voltages) * dwell_time
     if RampBack:
         voltages = np.append(voltages, voltages[-2::-1])
