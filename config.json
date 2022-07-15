@@ -1,6 +1,6 @@
 {
   "readout_rate": 1.0,
-  "mario": false
+  "mario": false,
 
   "_mode-comment": "Allowed modes: 'ramping' or 'custom'.",
   "mode": "ramping",

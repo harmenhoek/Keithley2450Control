@@ -40,16 +40,16 @@ print("Keithley2450Control program")
 print('Checking available devices ...')
 
 rm = pyvisa.ResourceManager()  # should use Keysight by default
-print(f"Found devices: {rm.list_resources()}. Needs device {config['device_id']}")
+print(f"Found devices: {rm.list_resources()}. Needs device {config['advanced_settings']['device_id']}")
 
 try:
-    keithley = Keithley2450(config['device_id'])
+    keithley = Keithley2450(config['advanced_settings']['device_id'])
     print('Connection successfull.')
     if config['mario']:
         mariobeep(keithley)
 
     keithley.reset()
-    if config['front_terminals']:
+    if config['advanced_settings']['front_terminals']:
         keithley.use_front_terminals()
     keithley.measure_current()
     keithley.enable_source()
@@ -62,7 +62,7 @@ except:
 
 
 def ReadOutToLogFile(f, setvoltage):
-    datetimestamp = datetime.now().strftime(config['datetime_format'])
+    datetimestamp = datetime.now().strftime(config['advanced_settings']['datetime_format'])
     # print(f"{datetimestamp}, {keithley.mean_current}, {keithley.mean_voltage}, {setvoltage}")
     # f.write(f"{datetimestamp}, {keithley.mean_current}, {keithley.mean_voltage}, {setvoltage}\n")
     print(f"{datetimestamp}, {keithley.current}, {keithley.voltage}, {setvoltage}")
