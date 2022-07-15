@@ -5,16 +5,29 @@ import time
 from mariobeep import mariobeep
 import keyboard
 import numpy as np
-
-readout_rate = 1.0  # frequency in hz
-
-target_voltage = 3  # in Volts
-steps = 10  # int number of steps
-pause = 3  # pause in seconds
-
-RampBack = True
-
 import pyvisa
+
+# ----------------------- SETTINGS ---------------------
+
+readout_rate = 1.0  # read out frequency in hz
+
+Ramping = False  # allows to ramp to a target_voltage in steps, dwelling dwell_time at each step.
+target_voltage = 3  # in volts
+steps = 10  # int number of steps
+dwell_time = 3  # pause in seconds
+RampBack = True  # ramps back to 0 with same steps and dwell_time at the end
+
+CustomRange = True  # set a custom range of voltages and dwell times.
+voltage_range = [0, 3, 0]  # in volts
+dwell_time = [10, 60, 10]  # in seconds
+
+# ----------------------- Don't make changes below here ---------------------
+
+if Ramping is True and CustomRange is True:
+    raise AttributeError("'Ramping' and 'CustomRange' cannot both be True.")
+elif Ramping is False and CustomRange is False:
+    raise AttributeError("'Ramping' and 'CustomRange' cannot both be False.")
+
 
 rm = pyvisa.ResourceManager()  # should use Keysight by default
 print(rm.list_resources())
@@ -28,27 +41,31 @@ try:
     keithley.measure_current()
     keithley.enable_source()
 
-    # keithley.apply_voltage()
-
-    keithley.config_buffer(points=100)
-    keithley.start_buffer()
+    # keithley.config_buffer(points=100)
+    # keithley.start_buffer()
 except:
     raise ConnectionError("Unable to connect to the Keithley 2450.")
 
 
 def ReadOutToLogFile(f, setvoltage):
     datetimestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-    print(f"{datetimestamp}, {keithley.mean_current}, {keithley.mean_voltage}, {setvoltage}")
-    f.write(f"{datetimestamp}, {keithley.mean_current}, {keithley.mean_voltage}, {setvoltage}\n")
-    keithley.reset_buffer()
-    keithley.start_buffer()
+    # print(f"{datetimestamp}, {keithley.mean_current}, {keithley.mean_voltage}, {setvoltage}")
+    # f.write(f"{datetimestamp}, {keithley.mean_current}, {keithley.mean_voltage}, {setvoltage}\n")
+    print(f"{datetimestamp}, {keithley.current}, {keithley.voltage}, {setvoltage}")
+    f.write(f"{datetimestamp}, {keithley.current}, {keithley.voltage}, {setvoltage}\n")
+    # keithley.reset_buffer()
+    # keithley.start_buffer()
 
-
-# voltages = iter(np.linspace(0, target_voltage, steps))
 setvoltage = None
-voltages = np.linspace(0, target_voltage, steps)
-if RampBack:
-    voltages = np.append(voltages, voltages[-2::-1])
+
+if Ramping:
+    voltages = np.linspace(0, target_voltage, steps)
+    dwell_time = np.ones_like(voltages) * dwell_time
+    if RampBack:
+        voltages = np.append(voltages, voltages[-2::-1])
+
+if CustomRange:
+    voltages = voltage_range
 
 
 datetimestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -76,10 +93,9 @@ with open(filename, 'w') as f:
             ramping = True
             print(f'Ramping started with voltages: {voltages}.')
 
-        if ramping and (time.time() - t_start_2 > pause):
+        if ramping and (time.time() - t_start_2 > dwell_time[cntr]):
             if cntr < len(voltages):
                 setvoltage = voltages[cntr]
-                # setvoltage = next(voltages, None)
                 print(f'Voltage set to {setvoltage}V.')
                 keithley.source_voltage = setvoltage
                 keithley.current
@@ -93,13 +109,3 @@ with open(filename, 'w') as f:
             print('Stopping now!')
             keithley.shutdown()
             loop = False
-
-'''
-keithley.enable_source()                # Enables the source output
-target_voltage = 3
-steps = 10
-pause = 1
-keithley.ramp_to_voltage(target_voltage, steps, pause)
-
-
-'''
