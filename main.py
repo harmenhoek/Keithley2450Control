@@ -6,40 +6,54 @@ from mariobeep import mariobeep
 import keyboard
 import numpy as np
 import pyvisa
+import os
+import json
 
-# ----------------------- SETTINGS ---------------------
+config_path = 'config.json'
 
-readout_rate = 1.0  # read out frequency in hz
+if not os.path.isfile(config_path):
+    raise FileNotFoundError("config.json is not found.")
 
-Ramping = False  # allows to ramp to a target_voltage in steps, dwelling dwell_time at each step.
-target_voltage = 3  # in volts
-steps = 10  # int number of steps
-dwell_time = 3  # pause in seconds
-RampBack = True  # ramps back to 0 with same steps and dwell_time at the end
+with open(config_path) as f:
+    config = json.load(f)
 
-CustomRange = True  # set a custom range of voltages and dwell times.
-voltage_range = [0, 3, 0]  # in volts
-dwell_time = [10, 60, 10]  # in seconds
+readout_rate = config['readout_rate']  # read out frequency in hz
 
-# ----------------------- Don't make changes below here ---------------------
+if config['mode'] == 'ramping':
+    Ramping = True
+    CustomRange = False
+    target_voltage = config['ramping_settings']['target_voltage']  # in volts
+    steps = config['ramping_settings']['steps']  # int number of steps
+    dwell_time = config['ramping_settings']['dwell_time']  # pause in seconds
+    RampBack = config['ramping_settings']['rampback']  # ramps back to 0 with same steps and dwell_time at the end
+elif config['mode'] == 'custom':
+    Ramping = False
+    CustomRange = True
+    voltage_range = config['custom_settings']['voltage_range']  # in volts
+    dwell_time = config['custom_settings']['dwell_time']  # in seconds
+else:
+    raise AttributeError("No correct 'mode' selected. Use 'ramping' or 'custom'.")
 
-if Ramping is True and CustomRange is True:
-    raise AttributeError("'Ramping' and 'CustomRange' cannot both be True.")
-elif Ramping is False and CustomRange is False:
-    raise AttributeError("'Ramping' and 'CustomRange' cannot both be False.")
 
+print("Keithley2450Control program")
+
+print('Checking available devices ...')
 
 rm = pyvisa.ResourceManager()  # should use Keysight by default
-print(rm.list_resources())
+print(f"Found devices: {rm.list_resources()}. Needs device {config['device_id']}")
 
 try:
-    keithley = Keithley2450('USB0::0x05E6::0x2450::04456958::INSTR')
-    # mariobeep(keithley)
+    keithley = Keithley2450(config['device_id'])
+    print('Connection successfull.')
+    if config['mario']:
+        mariobeep(keithley)
 
     keithley.reset()
-    keithley.use_front_terminals()
+    if config['front_terminals']:
+        keithley.use_front_terminals()
     keithley.measure_current()
     keithley.enable_source()
+    print('Keithley setup correctly.')
 
     # keithley.config_buffer(points=100)
     # keithley.start_buffer()
@@ -48,7 +62,7 @@ except:
 
 
 def ReadOutToLogFile(f, setvoltage):
-    datetimestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+    datetimestamp = datetime.now().strftime(config['datetime_format'])
     # print(f"{datetimestamp}, {keithley.mean_current}, {keithley.mean_voltage}, {setvoltage}")
     # f.write(f"{datetimestamp}, {keithley.mean_current}, {keithley.mean_voltage}, {setvoltage}\n")
     print(f"{datetimestamp}, {keithley.current}, {keithley.voltage}, {setvoltage}")
@@ -78,6 +92,7 @@ with open(filename, 'w') as f:
     ramping = False
     loop = True
     cntr = 0
+    print("  Start voltage sweep by pressing 'a' (long press might be needed).\n  Stop code by pressing 'ESC'.")
     while loop:
 
         # Log
@@ -109,3 +124,5 @@ with open(filename, 'w') as f:
             print('Stopping now!')
             keithley.shutdown()
             loop = False
+
+print('Program terminated successfully. Bye!')

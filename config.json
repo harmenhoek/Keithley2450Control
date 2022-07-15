@@ -1,0 +1,26 @@
+{
+  "readout_rate": 1.0,
+  "mario": false
+
+  "_mode-comment": "Allowed modes: 'ramping' or 'custom'.",
+  "mode": "ramping",
+
+  "ramping_settings": {
+    "target_voltage": 3.0,
+    "steps": 10,
+    "dwell_time": 3,
+    "rampback": false
+  },
+
+  "custom_settings": {
+    "voltage_range": [0, 3, 0],
+    "dwell_time": [10, 60, 10]
+  },
+
+
+  "advanced_settings": {
+    "device_id": "USB0::0x05E6::0x2450::04456958::INSTR",
+    "front_terminals": true,
+    "datetime_format": "%Y-%m-%d %H:%M:%S.%f"
+  }
+}

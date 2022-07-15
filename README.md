@@ -14,3 +14,7 @@ Install all packages: <br>
 ``pip install -r requirements.txt``
 
 Run `main.py`.
+
+-----
+
+Download `dist/Keithley2450Control.exe` and `config.json`.
